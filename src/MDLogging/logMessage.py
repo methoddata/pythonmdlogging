@@ -142,7 +142,7 @@ class MDLogger:
                 "message": message,
                 "provider": self.provider,
                 "projectName": self.projectName,
-                "loggingLevel": "ERROR",
+                "loggingLevel": "WARN",
             } 
 
             #if self.requestPayload is not None:
@@ -171,7 +171,7 @@ class MDLogger:
     def __SendMessage(self, data):
         try:
             header = {
-                    "authorization": f"Bearer {self.loggingBearer}",
+                    "x-api-key": f"{self.loggingBearer}",
                     "Content-Type": "application/json"
                 }
             response : requests.Response= requests.post(url=self.loggingEndpoint, data= json.dumps(data), headers=header)
