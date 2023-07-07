@@ -6,7 +6,7 @@ import requests
 from io import StringIO
 
 class MDLogger:
-    def __init__(self, serviceName, provider, projectname, loggingLevel = "WARN",requestPaylaod = None, logFormat = '%(asctime)s - %(levelname)s - %(message)s') -> None:
+    def __init__(self, serviceName, provider, projectname, loggingLevel = "WARN",requestPayload = None, logFormat = '%(asctime)s - %(levelname)s - %(message)s') -> None:
         '''
         serviceName - Name of the function
         requestPayload - The request for Event-Driven functions
@@ -38,12 +38,13 @@ class MDLogger:
                 datefmt='%Y-%m-%d:%H:%M:%S'))
         self.logger.addHandler(handler)
         self.isActive = False
-        self.requestPayload = requestPaylaod
+        self.requestPayload = requestPayload
         self.serviceName = serviceName
         self.provider = provider
         self.projectName = projectname
         self.loggingBearer = os.getenv('loggingBearer', None)
         self.loggingEndpoint = os.getenv('loggingEndpoint', None)
+        self.loggingStage = os.getenv('loggingStage', "dev")
 
         if self.loggingBearer is None:
             self.logger.warn("No Logging Authenticaion Token Found")
@@ -90,6 +91,7 @@ class MDLogger:
                 "provider": self.provider,
                 "projectName": self.projectName,
                 "loggingLevel": "ERROR",
+                "stage": self.loggingStage
             } 
             if self.requestPayload is not None:
                 data.update({"requestPayload": self.requestPayload})
@@ -115,7 +117,8 @@ class MDLogger:
                 "message": message,
                 "provider": self.provider,
                 "projectName": self.projectName,
-                "loggingLevel": "ERROR"
+                "loggingLevel": "ERROR",
+                "stage": self.loggingStage
             } 
 
             if self.requestPayload is not None:
@@ -143,6 +146,7 @@ class MDLogger:
                 "provider": self.provider,
                 "projectName": self.projectName,
                 "loggingLevel": "WARN",
+                "stage": self.loggingStage
             } 
 
             #if self.requestPayload is not None:
