@@ -91,7 +91,7 @@ class MDLogger:
             logging.info("Logger Configuration found")
             self.isActive = True
 
-    def exception(self, message=""):
+    def exception(self, message="", exception=None):
         """
         Use in a try/catch block
         message - Logging Message, Excluding traceback
@@ -114,7 +114,25 @@ class MDLogger:
             if cleaned_traceback == "NoneType: None":
                 cleaned_traceback = "No Traceback Found"
             current_span = trace.get_current_span()
-            current_span.add_event(f"EXCEPTION: {message} - {cleaned_traceback}")
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    current_span.add_event(
+                        f"EXCEPTION: {message} - {cleaned_traceback}"
+                    )
+                    if exception is not None:
+                        current_span.record_exception(exception)
+                        current_span.set_status(
+                            trace.Status(trace.StatusCode.ERROR, str(exception))
+                        )
+                    else:
+                        current_span.set_status(
+                            trace.Status(
+                                trace.StatusCode.ERROR,
+                                str({message} - {cleaned_traceback}),
+                            )
+                        )
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
                 return None
@@ -141,7 +159,11 @@ class MDLogger:
         """
         try:
             current_span = trace.get_current_span()
-            current_span.add_event(f"ERROR: {message}")
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    current_span.add_event(f"ERROR: {message}")
             self.logger.error(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -175,15 +197,8 @@ class MDLogger:
             if current_span is not None:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
-                    self.logger.info(
-                        f"Current Span Name: {span_context.trace_id}",
-                    )
-                    current_span.add_event(f"INFO: {message}")
-                else:
-                    self.logger.info("No active span context found.")
-            else:
-                self.logger.info("No active span context found.")
-            self.logger.info("Test")
+                    current_span.add_event(f"WARN: {message}")
+
             self.logger.warn(f"Message: {message}")
             if self.isActive is False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -217,10 +232,7 @@ class MDLogger:
             if current_span is not None:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
-                    print("Current Span Name:", span_context.trace_id)
                     current_span.add_event(f"INFO: {message}")
-                else:
-                    print("No active span context found.")
 
             self.logger.info(f"Message: {message}")
             if self.isActive == False:
