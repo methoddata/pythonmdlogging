@@ -176,15 +176,17 @@ class MDLogger:
             if current_span is not None:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
-                    print("Current Span Name:", span_context.trace_id)
+                    self.logger.info(
+                        f"Current Span Name: {span_context.trace_id}",
+                    )
                     current_span.add_event(f"INFO: {message}")
                 else:
-                    print("No active span context found.")
+                    self.logger.info("No active span context found.")
             else:
-                print("No active span context found.")
-
+                self.logger.info("No active span context found.")
+            self.logger.info("Test")
             self.logger.warn(f"Message: {message}")
-            if self.isActive == False:
+            if self.isActive is False:
                 self.logger.warn(f"Logger Configuration not Found")
                 return None
 

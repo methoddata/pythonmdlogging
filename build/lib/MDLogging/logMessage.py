@@ -18,7 +18,6 @@ from pydantic import BaseSettings
 global_tracer_provider: Optional[object] = None
 tracer_providers_by_service_name: Dict[str, object] = {}
 span_processors = []
-global_service_name = ""
 
 
 class MDLogger:
@@ -62,10 +61,9 @@ class MDLogger:
             logging.Formatter("%(message)s", datefmt="%Y-%m-%d:%H:%M:%S")
         )
         self.logger.addHandler(handler)
+        self.logger.addHandler(TraceEventLogHandler())
         self.isActive = False
         self.requestPayload = requestPayload
-        global global_service_name
-        global_service_name = serviceName
         self.serviceName = serviceName
         self.provider = provider
         self.projectName = projectname
@@ -116,7 +114,8 @@ class MDLogger:
                 cleaned_traceback = tracebackstring
             if cleaned_traceback == "NoneType: None":
                 cleaned_traceback = "No Traceback Found"
-
+            current_span = trace.get_current_span()
+            current_span.add_event(f"EXCEPTION: {message} - {cleaned_traceback}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
                 return None
@@ -142,6 +141,8 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+            current_span.add_event(f"ERROR: {message}")
             self.logger.error(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -170,8 +171,22 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    self.logger.info(
+                        f"Current Span Name: {span_context.trace_id}",
+                    )
+                    current_span.add_event(f"INFO: {message}")
+                else:
+                    self.logger.info("No active span context found.")
+            else:
+                self.logger.info("No active span context found.")
+            self.logger.info("Test")
             self.logger.warn(f"Message: {message}")
-            if self.isActive == False:
+            if self.isActive is False:
                 self.logger.warn(f"Logger Configuration not Found")
                 return None
 
@@ -198,6 +213,16 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    print("Current Span Name:", span_context.trace_id)
+                    current_span.add_event(f"INFO: {message}")
+                else:
+                    print("No active span context found.")
+
             self.logger.info(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -290,6 +315,7 @@ def MDinstrumented(
     wrapped_function: Optional[Callable] = None,
     *,
     span_name: Optional[str] = None,
+    service_name: Optional[str] = None,
     span_attributes: Optional[Dict[str, SpanAttributeValue]] = None,
 ):
     """
@@ -307,7 +333,7 @@ def MDinstrumented(
     """
     inst = MDInstrumented(
         span_name=span_name,
-        service_name=global_service_name,
+        service_name=service_name,
         span_attributes=span_attributes,
     )
     if wrapped_function:
