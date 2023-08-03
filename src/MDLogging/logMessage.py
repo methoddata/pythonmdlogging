@@ -293,6 +293,7 @@ class TraceEventLogHandler(logging.StreamHandler):
 
     def write(self, msg: str):
         if msg != self.terminator:
+            print(f"Adding Message to Span: {msg}")
             current_span = trace.get_current_span()
             current_span.add_event(msg)
 
