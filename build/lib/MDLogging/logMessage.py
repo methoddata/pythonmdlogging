@@ -164,6 +164,9 @@ class MDLogger:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
                     current_span.add_event(f"ERROR: {message}")
+                    current_span.set_status(
+                        trace.Status(trace.StatusCode.ERROR, str(message))
+                    )
             self.logger.error(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -198,7 +201,9 @@ class MDLogger:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
                     current_span.add_event(f"WARN: {message}")
-
+                    current_span.set_status(
+                        trace.Status(trace.StatusCode.ERROR, str(message))
+                    )
             self.logger.warn(f"Message: {message}")
             if self.isActive is False:
                 self.logger.warn(f"Logger Configuration not Found")
