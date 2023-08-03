@@ -18,7 +18,6 @@ from pydantic import BaseSettings
 global_tracer_provider: Optional[object] = None
 tracer_providers_by_service_name: Dict[str, object] = {}
 span_processors = []
-global_service_name = ""
 
 
 class MDLogger:
@@ -62,10 +61,9 @@ class MDLogger:
             logging.Formatter("%(message)s", datefmt="%Y-%m-%d:%H:%M:%S")
         )
         self.logger.addHandler(handler)
+        self.logger.addHandler(TraceEventLogHandler())
         self.isActive = False
         self.requestPayload = requestPayload
-        global global_service_name
-        global_service_name = serviceName
         self.serviceName = serviceName
         self.provider = provider
         self.projectName = projectname
@@ -286,10 +284,24 @@ class MDInstrumented:
         return new_f_async if is_async else new_f
 
 
+class TraceEventLogHandler(logging.StreamHandler):
+    """log handler class that adds log messages as events in the current span"""
+
+    def __init__(self):
+        super().__init__(stream=self)
+        self.name = "TraceEventLogHandler"
+
+    def write(self, msg: str):
+        if msg != self.terminator:
+            current_span = trace.get_current_span()
+            current_span.add_event(msg)
+
+
 def MDinstrumented(
     wrapped_function: Optional[Callable] = None,
     *,
     span_name: Optional[str] = None,
+    service_name: Optional[str] = None,
     span_attributes: Optional[Dict[str, SpanAttributeValue]] = None,
 ):
     """
@@ -307,7 +319,7 @@ def MDinstrumented(
     """
     inst = MDInstrumented(
         span_name=span_name,
-        service_name=global_service_name,
+        service_name=service_name,
         span_attributes=span_attributes,
     )
     if wrapped_function:
