@@ -61,7 +61,6 @@ class MDLogger:
             logging.Formatter("%(message)s", datefmt="%Y-%m-%d:%H:%M:%S")
         )
         self.logger.addHandler(handler)
-        self.logger.addHandler(TraceEventLogHandler())
         self.isActive = False
         self.requestPayload = requestPayload
         self.serviceName = serviceName
