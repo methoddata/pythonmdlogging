@@ -172,8 +172,14 @@ class MDLogger:
         """
         try:
             current_span = trace.get_current_span()
-            print(current_span)
-            current_span.add_event(f"WARN: {message}")
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    print("Current Span Name:", span_context.trace_id)
+                    current_span.add_event(f"INFO: {message}")
+                else:
+                    print("No active span context found.")
             self.logger.warn(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -203,7 +209,15 @@ class MDLogger:
         """
         try:
             current_span = trace.get_current_span()
-            current_span.add_event(f"INFO: {message}")
+
+            if current_span is not None:
+                span_context = current_span.get_span_context()
+                if span_context is not None:
+                    print("Current Span Name:", span_context.trace_id)
+                    current_span.add_event(f"INFO: {message}")
+                else:
+                    print("No active span context found.")
+
             self.logger.info(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
