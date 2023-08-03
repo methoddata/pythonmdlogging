@@ -172,6 +172,7 @@ class MDLogger:
         """
         try:
             current_span = trace.get_current_span()
+            print(current_span)
             current_span.add_event(f"WARN: {message}")
             self.logger.warn(f"Message: {message}")
             if self.isActive == False:
