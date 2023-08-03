@@ -114,7 +114,8 @@ class MDLogger:
                 cleaned_traceback = tracebackstring
             if cleaned_traceback == "NoneType: None":
                 cleaned_traceback = "No Traceback Found"
-
+            current_span = trace.get_current_span()
+            current_span.add_event(f"EXCEPTION: {message} - {cleaned_traceback}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
                 return None
@@ -140,6 +141,8 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+            current_span.add_event(f"ERROR: {message}")
             self.logger.error(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -168,6 +171,8 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+            current_span.add_event(f"WARN: {message}")
             self.logger.warn(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -196,6 +201,8 @@ class MDLogger:
         request - Optional
         """
         try:
+            current_span = trace.get_current_span()
+            current_span.add_event(f"INFO: {message}")
             self.logger.info(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
@@ -282,20 +289,6 @@ class MDInstrumented:
                 return await wrapped_function(*args, **kwargs)
 
         return new_f_async if is_async else new_f
-
-
-class TraceEventLogHandler(logging.StreamHandler):
-    """log handler class that adds log messages as events in the current span"""
-
-    def __init__(self):
-        super().__init__(stream=self)
-        self.name = "TraceEventLogHandler"
-
-    def write(self, msg: str):
-        if msg != self.terminator:
-            print(f"Adding Message to Span: {msg}")
-            current_span = trace.get_current_span()
-            current_span.add_event(msg)
 
 
 def MDinstrumented(
