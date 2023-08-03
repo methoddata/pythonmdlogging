@@ -180,6 +180,9 @@ class MDLogger:
                     current_span.add_event(f"INFO: {message}")
                 else:
                     print("No active span context found.")
+            else:
+                print("No active span context found.")
+
             self.logger.warn(f"Message: {message}")
             if self.isActive == False:
                 self.logger.warn(f"Logger Configuration not Found")
