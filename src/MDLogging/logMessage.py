@@ -90,6 +90,8 @@ class MDLogger:
         ):
             logging.info("Logger Configuration found")
             self.isActive = True
+        else:
+            logging.info("Logger Configuration not found")
 
     def exception(self, message="", exception=None):
         """
@@ -136,13 +138,12 @@ class MDLogger:
                                 str({message} - {cleaned_traceback}),
                             )
                         )
-                    current_span.set_attribute("Exception", message)
-                    current_span.set_attribute("Project Name", self.projectName)
-                    current_span.set_attribute("Service Name", self.serviceName)
-                    current_span.set_attribute("Stage", self.loggingStage)
-                    current_span.set_attribute("Provider", self.provider)
-            if self.isActive == False:
-                self.logger.warn(f"Logger Configuration not Found")
+                    current_span.set_attribute("Exception", str(message))
+                    current_span.set_attribute("Project Name", str(self.projectName))
+                    current_span.set_attribute("Service Name", str(self.serviceName))
+                    current_span.set_attribute("Stage", str(self.loggingStage))
+                    current_span.set_attribute("Provider", str(self.provider))
+            if self.isActive is False:
                 return None
             data = {
                 "serviceName": self.serviceName,
@@ -175,14 +176,13 @@ class MDLogger:
                     current_span.set_status(
                         trace.Status(trace.StatusCode.ERROR, str(message))
                     )
-                    current_span.set_attribute("ERROR", message)
-                    current_span.set_attribute("Project Name", self.projectName)
-                    current_span.set_attribute("Service Name", self.serviceName)
-                    current_span.set_attribute("Stage", self.loggingStage)
-                    current_span.set_attribute("Provider", self.provider)
+                    current_span.set_attribute("ERROR", str(message))
+                    current_span.set_attribute("Project Name", str(self.projectName))
+                    current_span.set_attribute("Service Name", str(self.serviceName))
+                    current_span.set_attribute("Stage", str(self.loggingStage))
+                    current_span.set_attribute("Provider", str(self.provider))
             self.logger.error(f"Message: {message}")
-            if self.isActive == False:
-                self.logger.warning(f"Logger Configuration not Found")
+            if self.isActive is False:
                 return None
 
             data = {
@@ -214,17 +214,16 @@ class MDLogger:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
                     current_span.add_event(f"WARN: {message}")
-                    current_span.set_attribute("Warning", message)
-                    current_span.set_attribute("Project Name", self.projectName)
-                    current_span.set_attribute("Service Name", self.serviceName)
-                    current_span.set_attribute("Stage", self.loggingStage)
-                    current_span.set_attribute("Provider", self.provider)
+                    current_span.set_attribute("Warning", str(message))
+                    current_span.set_attribute("Project Name", str(self.projectName))
+                    current_span.set_attribute("Service Name", str(self.serviceName))
+                    current_span.set_attribute("Stage", str(self.loggingStage))
+                    current_span.set_attribute("Provider", str(self.provider))
                     current_span.set_status(
                         trace.Status(trace.StatusCode.ERROR, str(message))
                     )
             self.logger.warning(f"Message: {message}")
             if self.isActive is False:
-                self.logger.warning(f"Logger Configuration not Found")
                 return None
 
             data = {
@@ -256,15 +255,14 @@ class MDLogger:
                 span_context = current_span.get_span_context()
                 if span_context is not None:
                     current_span.add_event(f"INFO: {message}")
-                    current_span.set_attribute("Info", message)
-                    current_span.set_attribute("Project Name", self.projectName)
-                    current_span.set_attribute("Service Name", self.serviceName)
-                    current_span.set_attribute("Stage", self.loggingStage)
-                    current_span.set_attribute("Provider", self.provider)
+                    current_span.set_attribute("Info", str(message))
+                    current_span.set_attribute("Project Name", str(self.projectName))
+                    current_span.set_attribute("Service Name", str(self.serviceName))
+                    current_span.set_attribute("Stage", str(self.loggingStage))
+                    current_span.set_attribute("Provider", str(self.provider))
 
             self.logger.info(f"Message: {message}")
-            if self.isActive == False:
-                self.logger.warning(f"Logger Configuration not Found")
+            if self.isActive is False:
                 return None
 
         except Exception as e:
