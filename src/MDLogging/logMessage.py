@@ -356,7 +356,7 @@ def MDinstrumented(
     span_name: Optional[str] = None,
     service_name: Optional[str] = None,
     span_attributes: Optional[Dict[str, SpanAttributeValue]] = None,
-):
+) -> Any:
     """
     Decorator to enable opentelemetry instrumentation on a function.
 
