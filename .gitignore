@@ -33,3 +33,5 @@ _ReSharper*/
 packages/
 __pycache__
 MDLogging.egg-info
+venv
+build
