@@ -310,7 +310,7 @@ def get_tracer(module_name: str, service_name: str = None):
         return trace.get_tracer(module_name, tracer_provider=tracer_provider)
 
 
-class MDInstrumented:
+class __MDInstrumented:
     def __init__(
         self,
         span_name,
@@ -368,7 +368,7 @@ def MDinstrumented(
                          of `init_telemetry_provider`
     @param span_attributes: optional dictionary of attributes to be set on the span
     """
-    inst = MDInstrumented(
+    inst = __MDInstrumented(
         span_name=span_name,
         service_name=service_name,
         span_attributes=span_attributes,
